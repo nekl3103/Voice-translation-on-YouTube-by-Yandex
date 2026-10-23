@@ -1,0 +1,57 @@
+#vvt-panel {
+  --vvt-width: 620px;
+  position: fixed;
+  z-index: 2147483646;
+  box-sizing: border-box;
+  width: var(--vvt-width);
+  max-width: calc(100vw - 24px);
+  color: #f8fafc;
+  background: rgba(18, 23, 34, .92);
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  font: 500 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  direction: ltr;
+  text-align: left;
+}
+#vvt-panel * { box-sizing: border-box; }
+#vvt-panel button, #vvt-panel select, #vvt-panel input { font: inherit; }
+#vvt-panel button { cursor: pointer; }
+#vvt-panel .vvt-bar { display:flex; align-items:center; gap:8px; padding:7px 9px; }
+#vvt-panel .vvt-brand { display:grid; place-items:center; width:28px; height:28px; flex:none; border-radius:9px; background:linear-gradient(135deg,#ffd75d,#ff8b5e); color:#202536; font-size:20px; }
+#vvt-panel .vvt-toggle { flex:none; min-height:34px; padding:0 12px; border:0; border-radius:10px; background:#ffd75d; color:#202536; font-weight:700; }
+#vvt-panel.vvt-active .vvt-toggle { background:#6de0b1; }
+#vvt-panel .vvt-toggle:hover { filter:brightness(1.08); }
+#vvt-panel .vvt-toggle:disabled { opacity:.7; cursor:wait; }
+#vvt-panel .vvt-divider { width:1px; height:25px; background:rgba(255,255,255,.18); }
+#vvt-panel .vvt-lang { display:flex; align-items:center; gap:5px; min-width:0; color:#aab6ca; white-space:nowrap; }
+#vvt-panel select { min-width:0; max-width:105px; padding:7px 22px 7px 8px; border:1px solid rgba(255,255,255,.16); border-radius:9px; background:#283346; color:#fff; outline:none; }
+#vvt-panel select:focus-visible, #vvt-panel button:focus-visible, #vvt-panel input:focus-visible { outline:2px solid #ffd75d; outline-offset:2px; }
+#vvt-panel .vvt-arrow { color:#ffd75d; font-size:17px; }
+#vvt-panel .vvt-more { margin-left:auto; flex:none; width:34px; height:34px; border:0; border-radius:10px; background:#283346; color:#fff; font-size:22px; line-height:1; }
+#vvt-panel .vvt-status { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 12px 8px; color:#b6c7da; font-size:11px; }
+#vvt-panel .vvt-status:empty { display:none; }
+#vvt-panel .vvt-menu { padding:8px 12px 12px; border-top:1px solid rgba(255,255,255,.12); }
+#vvt-panel .vvt-menu[hidden] { display:none; }
+#vvt-panel .vvt-row { display:flex; align-items:center; justify-content:space-between; gap:16px; min-height:39px; }
+#vvt-panel .vvt-row select { max-width:150px; }
+#vvt-panel .vvt-row input[type=checkbox] { width:19px; height:19px; accent-color:#ffd75d; }
+#vvt-panel .vvt-volume-row { display:grid; gap:8px; margin:8px 0 12px; }
+#vvt-panel .vvt-volume-row > span { display:flex; justify-content:space-between; }
+#vvt-panel .vvt-volume { width:100%; accent-color:#ffd75d; }
+#vvt-panel .vvt-pip, #vvt-panel .vvt-options { display:block; width:100%; min-height:36px; margin-top:6px; padding:7px 10px; border:1px solid rgba(255,255,255,.14); border-radius:10px; background:#283346; color:#f8fafc; text-align:left; }
+#vvt-panel .vvt-pip:hover, #vvt-panel .vvt-options:hover, #vvt-panel .vvt-more:hover { background:#35435b; }
+#vvt-subtitle { position:fixed; z-index:2147483645; box-sizing:border-box; padding:0 24px; color:#fff; font:700 clamp(17px,2.2vw,29px)/1.3 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; text-align:center; text-shadow:0 2px 5px #000,0 1px 2px #000; pointer-events:none; }
+#vvt-subtitle[hidden] { display:none; }
+.vvt-hide-source-captions .ytp-caption-window-container,
+.vvt-hide-source-captions .vjs-text-track-display,
+.vvt-hide-source-captions .plyr__captions,
+.vvt-hide-source-captions .jw-text-track-container { opacity:0!important; pointer-events:none!important; }
+@media (max-width:650px) {
+  #vvt-panel .vvt-bar { flex-wrap:wrap; }
+  #vvt-panel .vvt-toggle { flex:1; }
+  #vvt-panel .vvt-divider { display:none; }
+  #vvt-panel .vvt-more { order:1; }
+}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Voice Translate — настройки</title>
+  <link rel="stylesheet" href="options.css">
+  <script src="options.js" defer></script>
+</head>
+<body>
+  <main>
+    <header><div class="mark">◉</div><div><p class="eyebrow">VIDEO VOICE TRANSLATE</p><h1>Настройки перевода</h1><p>Управляйте доступом к видеосайтам. Языки, голос и громкость выбираются в панели над видео.</p></div></header>
+    <section class="card">
+      <h2>Другие сайты</h2>
+      <p>Добавьте адрес сайта, на котором есть HTML5-видео с субтитрами. Расширение запросит доступ только к этому сайту. Для плеера во встроенном окне может понадобиться отдельно добавить адрес самого плеера.</p>
+      <form id="add-site"><label for="site-input">Домен или адрес сайта</label><div class="input-row"><input id="site-input" type="text" placeholder="vimeo.com" autocomplete="off" required><button type="submit">Добавить</button></div></form>
+      <p id="site-message" class="message" role="status" aria-live="polite"></p>
+      <ul id="site-list" class="site-list"></ul>
+      <p class="hint">YouTube уже подключён. Перевод работает, когда плеер предоставляет субтитры. Для сайтов со своими закрытыми плеерами поддержка может быть неполной.</p>
+    </section>
+    <section class="card">
+      <h2>Режим инкогнито</h2>
+      <p>Chrome требует включить доступ вручную: откройте карточку этого расширения на <code>chrome://extensions</code> и включите «Разрешить использование в режиме инкогнито».</p>
+      <button id="open-extension" type="button" class="secondary">Открыть карточку расширения</button>
+      <p id="incognito-status" class="message" role="status"></p>
+    </section>
+    <section class="card">
+      <h2>О голосах</h2>
+      <p>«Обычный» использует стандартный голос системы. «Живой» выбирает более естественный голос, если такой установлен в Chrome или системе. Доступные голоса зависят от устройства; этот режим не копирует голос автора видео.</p>
+    </section>
+  </main>
+</body>
+</html>
