@@ -4,8 +4,17 @@
   const list = document.querySelector('#site-list');
   const message = document.querySelector('#site-message');
   const incognito = document.querySelector('#incognito-status');
-  const idFor = (host) => 'vvt_' + host.replace(/\./g, '_');
-  const patternFor = (host) => '*://' + host + '/*';
+  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+  const patternsFor = (host) => ['https://' + host + '/*', 'http://' + host + '/*'];
+
+  function selectTab(name) {
+    for (const tab of tabs) {
+      const selected = tab.dataset.tab === name;
+      tab.setAttribute('aria-selected', String(selected));
+      document.querySelector('#panel-' + tab.dataset.tab).hidden = !selected;
+    }
+  }
+  tabs.forEach((tab) => tab.addEventListener('click', () => selectTab(tab.dataset.tab)));
 
   function parseHost(value) {
     const url = new URL(value.includes('://') ? value : 'https://' + value);
@@ -15,14 +24,25 @@
     return host;
   }
 
+  function originHost(origin) {
+    const match = /^(?:https?|\*):\/\/([^/*]+)\//.exec(origin);
+    return match && match[1] !== '*' && !match[1].startsWith('*.') ? match[1].toLowerCase() : null;
+  }
+
   async function sites() {
-    const saved = await chrome.storage.sync.get({ videoVoiceTranslateSites: [] });
-    return saved.videoVoiceTranslateSites || [];
+    const { origins = [] } = await chrome.permissions.getAll();
+    return [...new Set(origins.map(originHost).filter(host => host && host !== 'youtube.com' && host !== 'www.youtube.com'))].sort();
+  }
+
+  async function syncScripts() {
+    const result = await chrome.runtime.sendMessage({ type: 'vvt-sync-sites' });
+    if (!result?.ok) throw Error(result?.error || 'Не удалось обновить доступ к сайту');
   }
 
   async function render() {
     list.replaceChildren();
     const hosts = await sites();
+    document.querySelector('#site-count').textContent = String(hosts.length);
     if (!hosts.length) {
       const empty = document.createElement('li');
       empty.textContent = 'Другие сайты пока не добавлены';
@@ -38,10 +58,17 @@
       remove.textContent = 'Удалить';
       remove.addEventListener('click', async () => {
         try {
-          await chrome.scripting.unregisterContentScripts({ ids: [idFor(host)] });
-          await chrome.permissions.remove({ origins: [patternFor(host)] });
+          const { origins = [] } = await chrome.permissions.getAll();
+          const granted = origins.filter(origin => originHost(origin) === host);
+          if (granted.length) {
+            const removed = await chrome.permissions.remove({ origins: granted });
+            if (!removed) throw Error('Chrome не удалил разрешение. Удалите сайт в разделе «Разрешённые сайты» на странице расширения.');
+            const { origins: remaining = [] } = await chrome.permissions.getAll();
+            if (remaining.some(origin => originHost(origin) === host)) throw Error('Сайт остаётся разрешённым в Chrome. Удалите его в разделе «Разрешённые сайты».');
+          }
+          await syncScripts();
           await chrome.storage.sync.set({ videoVoiceTranslateSites: (await sites()).filter((value) => value !== host) });
-          message.textContent = 'Сайт удалён. Обновите его вкладку.';
+          message.textContent = 'Активный доступ отключён. Chrome может показывать ранее разрешённый сайт в своей карточке расширения.';
           await render();
         } catch (error) { message.textContent = error.message || String(error); }
       });
@@ -60,16 +87,12 @@
       return;
     }
     try {
-      const pattern = patternFor(host);
-      const granted = await chrome.permissions.request({ origins: [pattern] });
+      const patterns = patternsFor(host);
+      const granted = await chrome.permissions.request({ origins: patterns });
       if (!granted) { message.textContent = 'Доступ к сайту не предоставлен'; return; }
+      await syncScripts();
       const current = await sites();
-      if (current.includes(host)) { message.textContent = 'Этот сайт уже добавлен'; return; }
-      await chrome.scripting.registerContentScripts([{
-        id: idFor(host), matches: [pattern], js: ['content.js'], css: ['content.css'],
-        allFrames: true, runAt: 'document_idle', persistAcrossSessions: true
-      }]);
-      await chrome.storage.sync.set({ videoVoiceTranslateSites: [...current, host] });
+      await chrome.storage.sync.set({ videoVoiceTranslateSites: current });
       input.value = '';
       message.textContent = 'Сайт добавлен. Обновите его вкладку.';
       await render();
@@ -78,6 +101,18 @@
 
   document.querySelector('#open-extension').addEventListener('click', () => {
     chrome.tabs.create({ url: 'chrome://extensions/?id=' + chrome.runtime.id });
+  });
+  if (window.self !== window.top) document.querySelector('#open-extension').hidden = true;
+  const autoTranslate = document.querySelector('#auto-translate');
+  chrome.storage.sync.get({ videoVoiceTranslate: {} }).then(({ videoVoiceTranslate }) => {
+    autoTranslate.checked = videoVoiceTranslate.autoTranslate === true;
+  });
+  autoTranslate.addEventListener('change', async () => {
+    const { videoVoiceTranslate = {} } = await chrome.storage.sync.get({ videoVoiceTranslate: {} });
+    await chrome.storage.sync.set({ videoVoiceTranslate: { ...videoVoiceTranslate, autoTranslate: autoTranslate.checked } });
+  });
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.videoVoiceTranslate) autoTranslate.checked = changes.videoVoiceTranslate.newValue?.autoTranslate === true;
   });
   chrome.extension.isAllowedIncognitoAccess().then((allowed) => {
     incognito.textContent = allowed ? 'Доступ в инкогнито включён' : 'Доступ в инкогнито пока выключен';

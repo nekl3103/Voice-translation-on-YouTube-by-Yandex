@@ -7,7 +7,9 @@
   "incognito": "split",
   "permissions": ["storage", "scripting"],
   "optional_host_permissions": ["http://*/*", "https://*/*"],
-  "options_page": "options.html",
+  "options_ui": { "page": "options.html", "open_in_tab": false },
+  "action": { "default_title": "Настройки Video Voice Translate" },
+  "background": { "service_worker": "background.js" },
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
